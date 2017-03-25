@@ -1,15 +1,15 @@
 # The name of your project (used to name the compiled .hex file)
 TARGET = $(notdir $(CURDIR))
 
-# The teensy version to use, 30, 31, 35, 36, or LC
-TEENSY = 30
+# The teensy version to use, 30, 31, 32, 35, 36, or LC
+TEENSY = 32
 
 # Set to 24000000, 48000000, or 96000000 to set CPU core speed
-TEENSY_CORE_SPEED = 48000000
+TEENSY_CORE_SPEED = 72000000
 
 # Some libraries will require this to be defined
 # If you define this, you will break the default main.cpp
-#ARDUINO = 10600
+ARDUINO = 10600
 
 # configurable options
 OPTIONS = -DUSB_SERIAL -DLAYOUT_US_ENGLISH
@@ -58,7 +58,7 @@ CXXFLAGS = -std=gnu++0x -felide-constructors -fno-exceptions -fno-rtti
 CFLAGS =
 
 # linker options
-LDFLAGS = -Os -Wl,--gc-sections -mthumb
+LDFLAGS = -Os -Wl,--defsym=__rtc_localtime=0,--gc-sections -mthumb 
 
 # additional libraries to link
 LIBS = -lm
@@ -69,6 +69,10 @@ ifeq ($(TEENSY), 30)
     LDSCRIPT = $(COREPATH)/mk20dx128.ld
     LDFLAGS += -mcpu=cortex-m4 -T$(LDSCRIPT)
 else ifeq ($(TEENSY), 31)
+    CPPFLAGS += -D__MK20DX256__ -mcpu=cortex-m4
+    LDSCRIPT = $(COREPATH)/mk20dx256.ld
+    LDFLAGS += -mcpu=cortex-m4 -T$(LDSCRIPT)
+else ifeq ($(TEENSY), 32)
     CPPFLAGS += -D__MK20DX256__ -mcpu=cortex-m4
     LDSCRIPT = $(COREPATH)/mk20dx256.ld
     LDFLAGS += -mcpu=cortex-m4 -T$(LDSCRIPT)
@@ -106,7 +110,9 @@ SIZE = $(abspath $(COMPILERPATH))/arm-none-eabi-size
 
 # automatically create lists of the sources and objects
 LC_FILES := $(wildcard $(LIBRARYPATH)/*/*.c)
+LC_SRC_FILES := $(wildcard $(LIBRARYPATH)/*/src/*.c)
 LCPP_FILES := $(wildcard $(LIBRARYPATH)/*/*.cpp)
+LCPP_SRC_FILES := $(wildcard $(LIBRARYPATH)/*/src/*.cpp)
 TC_FILES := $(wildcard $(COREPATH)/*.c)
 TCPP_FILES := $(wildcard $(COREPATH)/*.cpp)
 C_FILES := $(wildcard src/*.c)
@@ -115,8 +121,9 @@ INO_FILES := $(wildcard src/*.ino)
 
 # include paths for libraries
 L_INC := $(foreach lib,$(filter %/, $(wildcard $(LIBRARYPATH)/*/)), -I$(lib))
+L_INC_INC := $(foreach lib,$(filter %/, $(wildcard $(LIBRARYPATH)/*/inc/)), -I$(lib))
 
-SOURCES := $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(INO_FILES:.ino=.o) $(TC_FILES:.c=.o) $(TCPP_FILES:.cpp=.o) $(LC_FILES:.c=.o) $(LCPP_FILES:.cpp=.o)
+SOURCES := $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(INO_FILES:.ino=.o) $(TC_FILES:.c=.o) $(TCPP_FILES:.cpp=.o) $(LC_FILES:.c=.o) $(LC_SRC_FILES:.c=.o) $(LCPP_FILES:.cpp=.o) $(LCPP_SRC_FILES:.cpp=.o)
 OBJS := $(foreach src,$(SOURCES), $(BUILDDIR)/$(src))
 
 all: hex
@@ -136,17 +143,17 @@ upload: post_compile reboot
 $(BUILDDIR)/%.o: %.c
 	@echo -e "[CC]\t$<"
 	@mkdir -p "$(dir $@)"
-	@$(CC) $(CPPFLAGS) $(CFLAGS) $(L_INC) -o "$@" -c "$<"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) $(L_INC) $(L_INC_INC) -o "$@" -c "$<"
 
 $(BUILDDIR)/%.o: %.cpp
 	@echo -e "[CXX]\t$<"
 	@mkdir -p "$(dir $@)"
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(L_INC) -o "$@" -c "$<"
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(L_INC) $(L_INC_INC) -o "$@" -c "$<"
 
 $(BUILDDIR)/%.o: %.ino
 	@echo -e "[CXX]\t$<"
 	@mkdir -p "$(dir $@)"
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(L_INC) -o "$@" -x c++ -include Arduino.h -c "$<"
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(L_INC) $(L_INC_INC) -o "$@" -x c++ -include Arduino.h -c "$<"
 
 $(TARGET).elf: $(OBJS) $(LDSCRIPT)
 	@echo -e "[LD]\t$@"
