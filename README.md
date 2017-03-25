@@ -1,4 +1,5 @@
 Modification of <a href="https://github.com/apmorton/teensy-template">apmorton/teensy-template</a>
+<BR/>
 Setup:
 - locally install Arduino (tested with v1.69) and Teensyduino (tested with v1.35)
 - modify LINK_TO_-symlinks (or run tools/setup.sh in top directory on OSX)
