@@ -1,3 +1,11 @@
+Modification of <a href="https://github.com/apmorton/teensy-template">apmorton/teensy-template</a>
+Setup:
+- locally install Arduino (tested with v1.69) and Teensyduino (tested with v1.35)
+- modify LINK_TO_-symlinks (or run tools/setup.sh in top directory on OSX)
+- test `make` + `make upload`
+
+-----
+
 Teensy 3.X Project Template
 ===========================
 
