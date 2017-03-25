@@ -2,3 +2,5 @@
 *.d
 *.hex
 *.elf
+local_arduino_libraries
+
