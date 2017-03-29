@@ -3,4 +3,8 @@
 *.hex
 *.elf
 local_arduino_libraries
+LINK_TO_LOCAL_ARDUINO_LIBRARIES
+LINK_TO_TEENSY3
+LINK_TO_TOOLS_ARM
+
 
