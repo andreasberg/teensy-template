@@ -115,6 +115,7 @@ LCPP_FILES := $(wildcard $(LIBRARYPATH)/*/*.cpp)
 LCPP_SRC_FILES := $(wildcard $(LIBRARYPATH)/*/src/*.cpp)
 TC_FILES := $(wildcard $(COREPATH)/*.c)
 TCPP_FILES := $(wildcard $(COREPATH)/*.cpp)
+TCPP_FILES := $(filter-out $(COREPATH)/main.cpp, $(TCPP_FILES))
 C_FILES := $(wildcard src/*.c)
 CPP_FILES := $(wildcard src/*.cpp)
 INO_FILES := $(wildcard src/*.ino)
@@ -167,7 +168,19 @@ $(TARGET).elf: $(OBJS) $(LDSCRIPT)
 # compiler generated dependency info
 -include $(OBJS:.o=.d)
 
+<<<<<<< HEAD
 clean:
 	@echo Cleaning...
+=======
+clean: clean_app
+
+clean_app:
+	@echo Cleaning app...
+	@rm -rf "$(BUILDDIR)/src"
+	@rm -f "$(TARGET).elf" "$(TARGET).hex"
+
+clean_full:
+	@echo Cleaning all...
+>>>>>>> f3b262eca090aa5dc64e6812ceaaf84d806cf5e6
 	@rm -rf "$(BUILDDIR)"
 	@rm -f "$(TARGET).elf" "$(TARGET).hex"
