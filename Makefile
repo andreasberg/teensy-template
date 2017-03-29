@@ -168,10 +168,6 @@ $(TARGET).elf: $(OBJS) $(LDSCRIPT)
 # compiler generated dependency info
 -include $(OBJS:.o=.d)
 
-<<<<<<< HEAD
-clean:
-	@echo Cleaning...
-=======
 clean: clean_app
 
 clean_app:
@@ -181,6 +177,5 @@ clean_app:
 
 clean_full:
 	@echo Cleaning all...
->>>>>>> f3b262eca090aa5dc64e6812ceaaf84d806cf5e6
 	@rm -rf "$(BUILDDIR)"
 	@rm -f "$(TARGET).elf" "$(TARGET).hex"
