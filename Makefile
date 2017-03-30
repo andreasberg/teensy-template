@@ -38,6 +38,9 @@ endif
 # path location for Teensy 3 core
 COREPATH = teensy3
 
+# path location for Teensy libraries
+TEENSYLIBRARYPATH = teensylibraries
+
 # path location for Arduino libraries
 LIBRARYPATH = libraries
 
@@ -113,6 +116,8 @@ LC_FILES := $(wildcard $(LIBRARYPATH)/*/*.c)
 LC_SRC_FILES := $(wildcard $(LIBRARYPATH)/*/src/*.c)
 LCPP_FILES := $(wildcard $(LIBRARYPATH)/*/*.cpp)
 LCPP_SRC_FILES := $(wildcard $(LIBRARYPATH)/*/src/*.cpp)
+TLC_FILES := $(wildcard $(TEENSYLIBRARYPATH)/*/*.c)
+TLCPP_FILES := $(wildcard $(TEENSYLIBRARYPATH)/*/*.cpp)
 TC_FILES := $(wildcard $(COREPATH)/*.c)
 TCPP_FILES := $(wildcard $(COREPATH)/*.cpp)
 TCPP_FILES := $(filter-out $(COREPATH)/main.cpp, $(TCPP_FILES))
@@ -123,8 +128,9 @@ INO_FILES := $(wildcard src/*.ino)
 # include paths for libraries
 L_INC := $(foreach lib,$(filter %/, $(wildcard $(LIBRARYPATH)/*/)), -I$(lib))
 L_INC_INC := $(foreach lib,$(filter %/, $(wildcard $(LIBRARYPATH)/*/inc/)), -I$(lib))
+TL_INC := $(foreach lib,$(filter %/, $(wildcard $(TEENSYLIBRARYPATH)/*/)), -I$(lib))
 
-SOURCES := $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(INO_FILES:.ino=.o) $(TC_FILES:.c=.o) $(TCPP_FILES:.cpp=.o) $(LC_FILES:.c=.o) $(LC_SRC_FILES:.c=.o) $(LCPP_FILES:.cpp=.o) $(LCPP_SRC_FILES:.cpp=.o)
+SOURCES := $(C_FILES:.c=.o) $(CPP_FILES:.cpp=.o) $(INO_FILES:.ino=.o) $(TC_FILES:.c=.o) $(TCPP_FILES:.cpp=.o) $(LC_FILES:.c=.o) $(LC_SRC_FILES:.c=.o) $(LCPP_FILES:.cpp=.o) $(LCPP_SRC_FILES:.cpp=.o) $(TLC_FILES:.c=.o) $(TLCPP_FILES:.cpp=.o)
 OBJS := $(foreach src,$(SOURCES), $(BUILDDIR)/$(src))
 
 all: hex
@@ -144,17 +150,17 @@ upload: post_compile reboot
 $(BUILDDIR)/%.o: %.c
 	@echo -e "[CC]\t$<"
 	@mkdir -p "$(dir $@)"
-	@$(CC) $(CPPFLAGS) $(CFLAGS) $(L_INC) $(L_INC_INC) -o "$@" -c "$<"
+	@$(CC) $(CPPFLAGS) $(CFLAGS) $(L_INC) $(L_INC_INC) $(TL_INC) -o "$@" -c "$<"
 
 $(BUILDDIR)/%.o: %.cpp
 	@echo -e "[CXX]\t$<"
 	@mkdir -p "$(dir $@)"
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(L_INC) $(L_INC_INC) -o "$@" -c "$<"
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(L_INC) $(L_INC_INC) $(TL_INC) -o "$@" -c "$<"
 
 $(BUILDDIR)/%.o: %.ino
 	@echo -e "[CXX]\t$<"
 	@mkdir -p "$(dir $@)"
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(L_INC) $(L_INC_INC) -o "$@" -x c++ -include Arduino.h -c "$<"
+	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(L_INC) $(L_INC_INC) $(TL_INC) -o "$@" -x c++ -include Arduino.h -c "$<"
 
 $(TARGET).elf: $(OBJS) $(LDSCRIPT)
 	@echo -e "[LD]\t$@"
@@ -175,7 +181,7 @@ clean_app:
 	@rm -rf "$(BUILDDIR)/src"
 	@rm -f "$(TARGET).elf" "$(TARGET).hex"
 
-clean_full:
+clean_all:
 	@echo Cleaning all...
 	@rm -rf "$(BUILDDIR)"
 	@rm -f "$(TARGET).elf" "$(TARGET).hex"
